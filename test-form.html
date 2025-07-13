@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .form-container {
+      flex: 1;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .result-container {
+      flex: 1;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Student Management System API Test</h1>
+  <p>This form demonstrates how to properly format JSON requests to the API.</p>
+  
+  <div class="container">
+    <div class="form-container">
+      <h2>Register User</h2>
+      <form id="registerForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="Test Admin" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="admin@test.com" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" value="password123" required>
+        
+        <label for="role">Role:</label>
+        <select id="role" name="role" required>
+          <option value="admin">Admin</option>
+          <option value="faculty">Faculty</option>
+          <option value="student">Student</option>
+          <option value="staff">Staff</option>
+        </select>
+        
+        <button type="submit">Register</button>
+      </form>
+      <div id="registerResult"></div>
+      
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" name="email" value="admin@test.com" required>
+        
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="password" value="password123" required>
+        
+        <button type="submit">Login</button>
+      </form>
+      <div id="loginResult"></div>
+    </div>
+    
+    <div class="result-container">
+      <h2>Request & Response</h2>
+      <h3>Request</h3>
+      <pre id="requestData">No request sent yet</pre>
+      <h3>Response</h3>
+      <pre id="responseData">No response received yet</pre>
+    </div>
+  </div>
+  
+  <h2>Common JSON Formatting Errors</h2>
+  <p>The error you encountered was related to malformed JSON in the request body.</p>
+  <p>Your original request body was:</p>
+  <pre>{name:Test Admin,email:admin@test.com,password:password123,role:admin}</pre>
+  <p>This is not valid JSON because:</p>
+  <ul>
+    <li>Property names are not enclosed in quotes</li>
+    <li>String values are not enclosed in quotes</li>
+    <li>No commas between key-value pairs</li>
+  </ul>
+  <p>Correct JSON format:</p>
+  <pre>{"name":"Test Admin","email":"admin@test.com","password":"password123","role":"admin"}</pre>
+  
+  <script>
+    // API base URL from .env file
+    const API_URL = 'http://localhost:5000/api';
+    
+    // Register form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+      
+      const requestData = {
+        name,
+        email,
+        password,
+        role
+      };
+      
+      // Display request data
+      document.getElementById('requestData').textContent = JSON.stringify(requestData, null, 2);
+      
+      try {
+        const response = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+        
+        const data = await response.json();
+        
+        // Display response data
+        document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+        
+        if (response.ok) {
+          document.getElementById('registerResult').innerHTML = `<div class="success">Registration successful!</div>`;
+          // Store token in localStorage
+          localStorage.setItem('token', data.token);
+        } else {
+          document.getElementById('registerResult').innerHTML = `<div class="error">Error: ${data.message}</div>`;
+        }
+      } catch (error) {
+        document.getElementById('responseData').textContent = error.toString();
+        document.getElementById('registerResult').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+      }
+    });
+    
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      const requestData = {
+        email,
+        password
+      };
+      
+      // Display request data
+      document.getElementById('requestData').textContent = JSON.stringify(requestData, null, 2);
+      
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+        
+        const data = await response.json();
+        
+        // Display response data
+        document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+        
+        if (response.ok) {
+          document.getElementById('loginResult').innerHTML = `<div class="success">Login successful!</div>`;
+          // Store token in localStorage
+          localStorage.setItem('token', data.token);
+        } else {
+          document.getElementById('loginResult').innerHTML = `<div class="error">Error: ${data.message}</div>`;
+        }
+      } catch (error) {
+        document.getElementById('responseData').textContent = error.toString();
+        document.getElementById('loginResult').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+      }
+    });
+  </script>
+</body>
+</html>
