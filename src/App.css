@@ -1,4 +1,6 @@
 /* Reset default styles */
+@import "tailwindcss";
+
 #root {
   width: 100%;
   height: 100%;

@@ -1,20 +1,19 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, Routes, Route, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-// Import components (these would be actual imports in a real application)
-const StudentRegistration = () => <div>Student Registration Component</div>;
-const FacultyManagement = () => <div>Faculty Management Component</div>;
-const AcademicManagement = () => <div>Academic Management Component</div>;
-const FinanceManagement = () => <div>Finance Management Component</div>;
-const LibraryManagement = () => <div>Library Management Component</div>;
-const InventoryManagement = () => <div>Inventory Management Component</div>;
-const HostelManagement = () => <div>Hostel Management Component</div>;
-const AdminManagement = () => <div>Admin Management Component</div>;
+import StudentRegistration from '../student/StudentRegistration';
+import FacultyManagement from '../faculty/FacultyManagement';
+import AcademicManagement from '../academic/AcademicManagement';
+import FinanceManagement from '../finance/FinanceManagement';
+import LibraryManagement from '../library/LibraryManagement';
+import InventoryManagement from '../inventory/InventoryManagement';
+import HostelManagement from '../hostel/HostelManagement';
+import AdminManagement from '../admin/AdminManagement';
 
 const Dashboard = ({ userRole = 'admin' }) => {
-  const [activeModule, setActiveModule] = useState('overview');
   const { logout, currentUser } = useAuth();
+  const navigate = useNavigate();
 
   // Define modules available for each role
   const roleModules = {
@@ -225,13 +224,13 @@ const Dashboard = ({ userRole = 'admin' }) => {
           <ul className="space-y-2">
             {availableModules.map((module) => (
               <li key={module.id}>
-                <button
-                  onClick={() => setActiveModule(module.id)}
-                  className={`w-full flex items-center p-2 rounded-lg ${activeModule === module.id ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
+                <Link
+                  to={module.id === 'overview' ? '.' : module.id}
+                  className={`w-full flex items-center p-2 rounded-lg ${window.location.pathname.endsWith(module.id) ? 'bg-blue-100 text-blue-800' : 'hover:bg-gray-100'}`}
                 >
                   <span className="mr-3">{module.icon}</span>
                   <span>{module.name}</span>
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -244,7 +243,11 @@ const Dashboard = ({ userRole = 'admin' }) => {
         <header className="bg-white shadow-sm">
           <div className="flex justify-between items-center p-4">
             <h1 className="text-xl font-semibold">
-              {availableModules.find(m => m.id === activeModule)?.name || 'Dashboard'}
+              {/* Show current module name based on route */}
+              {(() => {
+                const path = window.location.pathname.split('/').pop();
+                return availableModules.find(m => m.id === path)?.name || 'Dashboard';
+              })()}
             </h1>
             <div className="flex items-center space-x-4">
               <button className="relative p-1">
@@ -271,7 +274,17 @@ const Dashboard = ({ userRole = 'admin' }) => {
 
         {/* Page Content */}
         <main className="p-6">
-          {renderModuleContent()}
+          <Routes>
+            <Route index element={<div>Select a module from the sidebar or view overview.</div>} />
+            <Route path="students" element={<StudentRegistration />} />
+            <Route path="faculty" element={<FacultyManagement />} />
+            <Route path="academic" element={<AcademicManagement />} />
+            <Route path="finance" element={<FinanceManagement />} />
+            <Route path="library" element={<LibraryManagement />} />
+            <Route path="inventory" element={<InventoryManagement />} />
+            <Route path="hostel" element={<HostelManagement />} />
+            <Route path="admin" element={<AdminManagement />} />
+          </Routes>
         </main>
       </div>
     </div>
