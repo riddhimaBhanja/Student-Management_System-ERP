@@ -13,6 +13,8 @@ const inventoryRoutes = require('./routes/inventory.routes');
 const hostelRoutes = require('./routes/hostel.routes');
 const adminRoutes = require('./routes/admin.routes');
 const { authenticateToken } = require('./middleware/auth.middleware');
+const globalErrorHandler = require('./utils/error-handler');
+const { AppError } = require('./utils/error-handler');
 
 // Load env vars
 dotenv.config();
@@ -43,14 +45,16 @@ app.use('/api/inventory', authenticateToken, inventoryRoutes);
 app.use('/api/hostel', authenticateToken, hostelRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    status: 'error',
-    message: err.message || 'Internal Server Error'
-  });
+// Handle undefined routes
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
+
+// Global error handling middleware
+app.use(globalErrorHandler);
+
+// Export app
+module.exports = app;
 
 const PORT = process.env.PORT || 5000;
 
