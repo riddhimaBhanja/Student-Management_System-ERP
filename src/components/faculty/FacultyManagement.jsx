@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const FacultyManagement = () => {
   const [activeTab, setActiveTab] = useState('employees');
+  const [showAddModal, setShowAddModal] = useState(false);
   const [facultyList, setFacultyList] = useState([
     {
       id: 1,
@@ -22,62 +23,13 @@ const FacultyManagement = () => {
       lastName: 'Smith',
       email: 'jane.smith@example.com',
       phone: '9876543211',
-      department: 'Electronics & Communication Engineering',
+      department: 'Electronics & Communication',
       designation: 'Associate Professor',
-      joiningDate: '2018-08-10',
-      status: 'active'
-    },
-    {
-      id: 3,
-      employeeId: 'FAC003',
-      firstName: 'Robert',
-      lastName: 'Johnson',
-      email: 'robert.johnson@example.com',
-      phone: '9876543212',
-      department: 'Mechanical Engineering',
-      designation: 'Professor',
-      joiningDate: '2015-03-22',
+      joiningDate: '2019-08-20',
       status: 'active'
     }
   ]);
 
-  const [leaveRequests, setLeaveRequests] = useState([
-    {
-      id: 1,
-      employeeId: 'FAC001',
-      employeeName: 'John Doe',
-      leaveType: 'Sick Leave',
-      startDate: '2023-07-10',
-      endDate: '2023-07-12',
-      reason: 'Medical treatment',
-      status: 'approved',
-      appliedOn: '2023-07-05'
-    },
-    {
-      id: 2,
-      employeeId: 'FAC002',
-      employeeName: 'Jane Smith',
-      leaveType: 'Casual Leave',
-      startDate: '2023-07-15',
-      endDate: '2023-07-16',
-      reason: 'Personal work',
-      status: 'pending',
-      appliedOn: '2023-07-08'
-    },
-    {
-      id: 3,
-      employeeId: 'FAC003',
-      employeeName: 'Robert Johnson',
-      leaveType: 'Academic Leave',
-      startDate: '2023-08-01',
-      endDate: '2023-08-05',
-      reason: 'Conference attendance',
-      status: 'pending',
-      appliedOn: '2023-07-20'
-    }
-  ]);
-
-  // State for new faculty form
   const [newFaculty, setNewFaculty] = useState({
     firstName: '',
     lastName: '',
@@ -85,50 +37,29 @@ const FacultyManagement = () => {
     phone: '',
     department: '',
     designation: '',
-    joiningDate: ''
+    joiningDate: '',
   });
 
-  // State for new leave request form
-  const [newLeaveRequest, setNewLeaveRequest] = useState({
-    employeeId: '',
-    leaveType: 'Casual Leave',
-    startDate: '',
-    endDate: '',
-    reason: ''
-  });
-
-  // Handle faculty form input changes
-  const handleFacultyInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewFaculty({
-      ...newFaculty,
+    setNewFaculty(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
-  // Handle leave request form input changes
-  const handleLeaveInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewLeaveRequest({
-      ...newLeaveRequest,
-      [name]: value
-    });
-  };
-
-  // Add new faculty
   const handleAddFaculty = (e) => {
     e.preventDefault();
-    const newId = facultyList.length > 0 ? Math.max(...facultyList.map(f => f.id)) + 1 : 1;
-    const employeeId = `FAC${String(newId).padStart(3, '0')}`;
+    const id = facultyList.length + 1;
+    const employeeId = `FAC${String(id).padStart(3, '0')}`;
     
-    const faculty = {
-      id: newId,
-      employeeId,
+    setFacultyList(prev => [...prev, {
       ...newFaculty,
+      id,
+      employeeId,
       status: 'active'
-    };
-    
-    setFacultyList([...facultyList, faculty]);
+    }]);
+
     setNewFaculty({
       firstName: '',
       lastName: '',
@@ -136,137 +67,127 @@ const FacultyManagement = () => {
       phone: '',
       department: '',
       designation: '',
-      joiningDate: ''
+      joiningDate: '',
     });
+    
+    setShowAddModal(false);
   };
 
-  // Add new leave request
-  const handleAddLeaveRequest = (e) => {
-    e.preventDefault();
-    const newId = leaveRequests.length > 0 ? Math.max(...leaveRequests.map(l => l.id)) + 1 : 1;
-    
-    // Find employee name based on employeeId
-    const employee = facultyList.find(f => f.employeeId === newLeaveRequest.employeeId);
-    const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : 'Unknown';
-    
-    const leaveRequest = {
-      id: newId,
-      employeeName,
-      ...newLeaveRequest,
-      status: 'pending',
-      appliedOn: new Date().toISOString().split('T')[0]
-    };
-    
-    setLeaveRequests([...leaveRequests, leaveRequest]);
-    setNewLeaveRequest({
-      employeeId: '',
-      leaveType: 'Casual Leave',
-      startDate: '',
-      endDate: '',
-      reason: ''
-    });
-  };
+  const departments = [
+    'Computer Science & Engineering',
+    'Electronics & Communication',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Electrical Engineering',
+    'Information Technology'
+  ];
 
-  // Update leave request status
-  const handleUpdateLeaveStatus = (id, newStatus) => {
-    setLeaveRequests(leaveRequests.map(leave => 
-      leave.id === id ? { ...leave, status: newStatus } : leave
-    ));
-  };
+  const designations = [
+    'Professor',
+    'Associate Professor',
+    'Assistant Professor',
+    'Senior Lecturer',
+    'Lecturer'
+  ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Faculty Management</h1>
-      
+    <div className="p-6">
       {/* Tabs */}
-      <div className="flex border-b mb-6">
-        <button 
-          className={`py-2 px-4 ${activeTab === 'employees' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('employees')}
-        >
-          Employee Records
-        </button>
-        <button 
-          className={`py-2 px-4 ${activeTab === 'leave' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500'}`}
-          onClick={() => setActiveTab('leave')}
-        >
-          Leave Management
-        </button>
+      <div className="border-b border-gray-200 mb-6">
+        <nav className="-mb-px flex space-x-8">
+          {['employees', 'departments', 'schedules'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`${
+                activeTab === tab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium capitalize`}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
       </div>
-      
-      {/* Employee Records Tab */}
+
+      {/* Content based on active tab */}
       {activeTab === 'employees' && (
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Faculty List</h2>
-            <button 
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => document.getElementById('addFacultyModal').classList.remove('hidden')}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800">Faculty Members</h2>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
             >
-              Add New Faculty
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Add Faculty Member
             </button>
           </div>
-          
-          {/* Faculty Table */}
-          <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-            <table className="min-w-full leading-normal">
-              <thead>
+
+          {/* Faculty List Table */}
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Employee ID
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Faculty ID
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Contact Info
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Department
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Designation
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Contact
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="bg-white divide-y divide-gray-200">
                 {facultyList.map((faculty) => (
                   <tr key={faculty.id}>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{faculty.employeeId}</p>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{faculty.employeeId}</div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <div className="flex items-center">
-                        <div className="ml-3">
-                          <p className="text-gray-900 whitespace-no-wrap">
-                            {faculty.firstName} {faculty.lastName}
-                          </p>
-                          <p className="text-gray-600 whitespace-no-wrap">{faculty.email}</p>
-                        </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {faculty.firstName} {faculty.lastName}
                       </div>
+                      <div className="text-sm text-gray-500">Joined {new Date(faculty.joiningDate).toLocaleDateString()}</div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{faculty.department}</p>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{faculty.email}</div>
+                      <div className="text-sm text-gray-500">{faculty.phone}</div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{faculty.designation}</p>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{faculty.department}</div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{faculty.phone}</p>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{faculty.designation}</div>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <span className={`relative inline-block px-3 py-1 font-semibold rounded-full ${faculty.status === 'active' ? 'text-green-900 bg-green-200' : 'text-red-900 bg-red-200'}`}>
-                        <span className="relative">{faculty.status === 'active' ? 'Active' : 'Inactive'}</span>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        faculty.status === 'active' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {faculty.status}
                       </span>
                     </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <button className="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
                       <button className="text-red-600 hover:text-red-900">Delete</button>
                     </td>
                   </tr>
@@ -274,382 +195,154 @@ const FacultyManagement = () => {
               </tbody>
             </table>
           </div>
-          
+
           {/* Add Faculty Modal */}
-          <div id="addFacultyModal" className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Add New Faculty</h3>
-                <button 
-                  onClick={() => document.getElementById('addFacultyModal').classList.add('hidden')}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
+          {showAddModal && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+              <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Add New Faculty Member</h3>
+                    <button
+                      onClick={() => setShowAddModal(false)}
+                      className="text-gray-400 hover:text-gray-500"
+                    >
+                      <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddFaculty}>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input
+                          type="text"
+                          name="firstName"
+                          value={newFaculty.firstName}
+                          onChange={handleInputChange}
+                          className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={newFaculty.lastName}
+                          onChange={handleInputChange}
+                          className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={newFaculty.email}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={newFaculty.phone}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                      <select
+                        name="department"
+                        value={newFaculty.department}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">Select Department</option>
+                        {departments.map((dept) => (
+                          <option key={dept} value={dept}>{dept}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                      <select
+                        name="designation"
+                        value={newFaculty.designation}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">Select Designation</option>
+                        {designations.map((desig) => (
+                          <option key={desig} value={desig}>{desig}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Joining Date</label>
+                      <input
+                        type="date"
+                        name="joiningDate"
+                        value={newFaculty.joiningDate}
+                        onChange={handleInputChange}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex justify-end space-x-3">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddModal(false)}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+                      >
+                        Add Faculty
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-              
-              <form onSubmit={handleAddFaculty}>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="firstName">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      name="firstName"
-                      value={newFaculty.firstName}
-                      onChange={handleFacultyInputChange}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lastName">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      name="lastName"
-                      value={newFaculty.lastName}
-                      onChange={handleFacultyInputChange}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={newFaculty.email}
-                    onChange={handleFacultyInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    id="phone"
-                    name="phone"
-                    value={newFaculty.phone}
-                    onChange={handleFacultyInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="department">
-                    Department
-                  </label>
-                  <select
-                    id="department"
-                    name="department"
-                    value={newFaculty.department}
-                    onChange={handleFacultyInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Department</option>
-                    <option value="Computer Science & Engineering">Computer Science & Engineering</option>
-                    <option value="Electronics & Communication Engineering">Electronics & Communication Engineering</option>
-                    <option value="Electrical Engineering">Electrical Engineering</option>
-                    <option value="Mechanical Engineering">Mechanical Engineering</option>
-                    <option value="Civil Engineering">Civil Engineering</option>
-                    <option value="Business Administration">Business Administration</option>
-                  </select>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="designation">
-                    Designation
-                  </label>
-                  <select
-                    id="designation"
-                    name="designation"
-                    value={newFaculty.designation}
-                    onChange={handleFacultyInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Designation</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Associate Professor">Associate Professor</option>
-                    <option value="Assistant Professor">Assistant Professor</option>
-                    <option value="Lecturer">Lecturer</option>
-                    <option value="Lab Assistant">Lab Assistant</option>
-                  </select>
-                </div>
-                
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="joiningDate">
-                    Joining Date
-                  </label>
-                  <input
-                    type="date"
-                    id="joiningDate"
-                    name="joiningDate"
-                    value={newFaculty.joiningDate}
-                    onChange={handleFacultyInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  />
-                </div>
-                
-                <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('addFacultyModal').classList.add('hidden')}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Add Faculty
-                  </button>
-                </div>
-              </form>
             </div>
-          </div>
+          )}
         </div>
       )}
-      
-      {/* Leave Management Tab */}
-      {activeTab === 'leave' && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Leave Requests</h2>
-            <button 
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => document.getElementById('addLeaveModal').classList.remove('hidden')}
-            >
-              Apply for Leave
-            </button>
-          </div>
-          
-          {/* Leave Requests Table */}
-          <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-            <table className="min-w-full leading-normal">
-              <thead>
-                <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Employee
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Leave Type
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Reason
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Applied On
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaveRequests.map((leave) => (
-                  <tr key={leave.id}>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <div className="flex items-center">
-                        <div className="ml-3">
-                          <p className="text-gray-900 whitespace-no-wrap">{leave.employeeName}</p>
-                          <p className="text-gray-600 whitespace-no-wrap">{leave.employeeId}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{leave.leaveType}</p>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{leave.startDate} to {leave.endDate}</p>
-                      <p className="text-gray-600 whitespace-no-wrap">
-                        {Math.ceil((new Date(leave.endDate) - new Date(leave.startDate)) / (1000 * 60 * 60 * 24) + 1)} days
-                      </p>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{leave.reason}</p>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <p className="text-gray-900 whitespace-no-wrap">{leave.appliedOn}</p>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      <span 
-                        className={`relative inline-block px-3 py-1 font-semibold rounded-full 
-                          ${leave.status === 'approved' ? 'text-green-900 bg-green-200' : 
-                            leave.status === 'rejected' ? 'text-red-900 bg-red-200' : 
-                            'text-yellow-900 bg-yellow-200'}`}
-                      >
-                        <span className="relative capitalize">{leave.status}</span>
-                      </span>
-                    </td>
-                    <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                      {leave.status === 'pending' && (
-                        <div>
-                          <button 
-                            onClick={() => handleUpdateLeaveStatus(leave.id, 'approved')}
-                            className="text-green-600 hover:text-green-900 mr-2"
-                          >
-                            Approve
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateLeaveStatus(leave.id, 'rejected')}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Add Leave Request Modal */}
-          <div id="addLeaveModal" className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Apply for Leave</h3>
-                <button 
-                  onClick={() => document.getElementById('addLeaveModal').classList.add('hidden')}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <form onSubmit={handleAddLeaveRequest}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="employeeId">
-                    Employee
-                  </label>
-                  <select
-                    id="employeeId"
-                    name="employeeId"
-                    value={newLeaveRequest.employeeId}
-                    onChange={handleLeaveInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="">Select Employee</option>
-                    {facultyList.map(faculty => (
-                      <option key={faculty.id} value={faculty.employeeId}>
-                        {faculty.firstName} {faculty.lastName} ({faculty.employeeId})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="leaveType">
-                    Leave Type
-                  </label>
-                  <select
-                    id="leaveType"
-                    name="leaveType"
-                    value={newLeaveRequest.leaveType}
-                    onChange={handleLeaveInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    required
-                  >
-                    <option value="Casual Leave">Casual Leave</option>
-                    <option value="Sick Leave">Sick Leave</option>
-                    <option value="Earned Leave">Earned Leave</option>
-                    <option value="Academic Leave">Academic Leave</option>
-                    <option value="Maternity Leave">Maternity Leave</option>
-                    <option value="Paternity Leave">Paternity Leave</option>
-                  </select>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="startDate">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      id="startDate"
-                      name="startDate"
-                      value={newLeaveRequest.startDate}
-                      onChange={handleLeaveInputChange}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="endDate">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      id="endDate"
-                      name="endDate"
-                      value={newLeaveRequest.endDate}
-                      onChange={handleLeaveInputChange}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reason">
-                    Reason
-                  </label>
-                  <textarea
-                    id="reason"
-                    name="reason"
-                    value={newLeaveRequest.reason}
-                    onChange={handleLeaveInputChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    rows="3"
-                    required
-                  ></textarea>
-                </div>
-                
-                <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('addLeaveModal').classList.add('hidden')}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Submit Request
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+
+      {/* Departments Tab */}
+      {activeTab === 'departments' && (
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Department Management Coming Soon</h3>
+          <p className="text-gray-600">This feature is under development.</p>
+        </div>
+      )}
+
+      {/* Schedules Tab */}
+      {activeTab === 'schedules' && (
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">Faculty Schedules Coming Soon</h3>
+          <p className="text-gray-600">This feature is under development.</p>
         </div>
       )}
     </div>

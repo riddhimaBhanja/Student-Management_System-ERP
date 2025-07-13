@@ -4,9 +4,9 @@ import './App.css'
 // Import components
 import Login from './components/auth/Login'
 import Dashboard from './components/dashboard/Dashboard'
-import { useAuth } from './context/AuthContext'
+import { useAuth, AuthProvider } from './context/AuthContext'
 
-function App() {
+function AppContent() {
   const { isAuthenticated, userRole } = useAuth()
 
   return (
@@ -18,16 +18,21 @@ function App() {
           path="/dashboard/*" 
           element={
             isAuthenticated() ? 
-            <Dashboard userRole={userRole} /> : 
-            <Navigate to="/login" />
-          } 
+              <Dashboard userRole={userRole} /> 
+              : <Navigate to="/login" />
+          }
         />
-        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
   )
 }
 
-
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  )
+}
 
 export default App
