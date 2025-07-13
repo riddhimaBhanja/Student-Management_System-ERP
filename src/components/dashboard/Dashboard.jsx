@@ -1,54 +1,37 @@
 import React from 'react';
-import { Link, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-// Import components
-import StudentRegistration from '../student/StudentRegistration';
-import FacultyManagement from '../faculty/FacultyManagement';
-import AcademicManagement from '../academic/AcademicManagement';
-import FinanceManagement from '../finance/FinanceManagement';
-import LibraryManagement from '../library/LibraryManagement';
-import InventoryManagement from '../inventory/InventoryManagement';
-import HostelManagement from '../hostel/HostelManagement';
-import AdminManagement from '../admin/AdminManagement';
-import Overview from '../dashboard/Overview';
-
-const Dashboard = ({ userRole = 'admin' }) => {
-  const { logout, currentUser } = useAuth();
+const Dashboard = () => {
+  const { logout, currentUser, userRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Define modules available for each role
   const roleModules = {
     admin: [
-      { id: 'overview', name: 'Overview', icon: '📊', component: Overview },
-      { id: 'students', name: 'Student Management', icon: '👨‍🎓', component: StudentRegistration },
-      { id: 'faculty', name: 'Faculty Management', icon: '👨‍🏫', component: FacultyManagement },
-      { id: 'academic', name: 'Academic Management', icon: '📚', component: AcademicManagement },
-      { id: 'finance', name: 'Finance Management', icon: '💰', component: FinanceManagement },
-      { id: 'library', name: 'Library Management', icon: '📖', component: LibraryManagement },
-      { id: 'inventory', name: 'Inventory Management', icon: '📦', component: InventoryManagement },
-      { id: 'hostel', name: 'Hostel Management', icon: '🏠', component: HostelManagement },
-      { id: 'admin', name: 'Administration', icon: '⚙️', component: AdminManagement },
+      { id: 'overview', name: 'Overview', icon: '📊' },
+      { id: 'students', name: 'Student Management', icon: '👨‍🎓' },
+      { id: 'faculty', name: 'Faculty Management', icon: '👨‍🏫' },
+      { id: 'academic', name: 'Academic Management', icon: '📚' },
+      { id: 'finance', name: 'Finance Management', icon: '💰' },
+      { id: 'library', name: 'Library Management', icon: '📖' },
+      { id: 'inventory', name: 'Inventory Management', icon: '📦' },
+      { id: 'hostel', name: 'Hostel Management', icon: '🏠' },
+      { id: 'admin', name: 'Administration', icon: '⚙️' },
     ],
     faculty: [
-      { id: 'overview', name: 'Overview', icon: '📊', component: Overview },
-      { id: 'academic', name: 'Academic Management', icon: '📚', component: AcademicManagement },
-      { id: 'students', name: 'Student Records', icon: '👨‍🎓', component: StudentRegistration },
-      { id: 'library', name: 'Library', icon: '📖', component: LibraryManagement },
+      { id: 'overview', name: 'Overview', icon: '📊' },
+      { id: 'academic', name: 'Academic Management', icon: '📚' },
+      { id: 'students', name: 'Student Records', icon: '👨‍🎓' },
+      { id: 'library', name: 'Library', icon: '📖' },
     ],
     student: [
-      { id: 'overview', name: 'Overview', icon: '📊', component: Overview },
-      { id: 'academic', name: 'Academic Records', icon: '📚', component: AcademicManagement },
-      { id: 'finance', name: 'Fees & Payments', icon: '💰', component: FinanceManagement },
-      { id: 'library', name: 'Library', icon: '📖', component: LibraryManagement },
-      { id: 'hostel', name: 'Hostel', icon: '🏠', component: HostelManagement },
-    ],
-    staff: [
-      { id: 'overview', name: 'Overview', icon: '📊', component: Overview },
-      { id: 'students', name: 'Student Records', icon: '👨‍🎓', component: StudentRegistration },
-      { id: 'inventory', name: 'Inventory Management', icon: '📦', component: InventoryManagement },
-      { id: 'library', name: 'Library Management', icon: '📖', component: LibraryManagement },
+      { id: 'overview', name: 'Overview', icon: '📊' },
+      { id: 'academic', name: 'Academic Records', icon: '📚' },
+      { id: 'finance', name: 'Fees & Payments', icon: '💰' },
+      { id: 'library', name: 'Library', icon: '📖' },
+      { id: 'hostel', name: 'Hostel', icon: '🏠' },
     ],
   };
 
@@ -72,10 +55,9 @@ const Dashboard = ({ userRole = 'admin' }) => {
         <div className="flex flex-col h-full">
           {/* Logo section */}
           <div className="flex items-center justify-between p-4 border-b">
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">EduERP</h1>
-              <p className="text-sm text-gray-600">{userRole.charAt(0).toUpperCase() + userRole.slice(1)} Dashboard</p>
-            </div>
+            <Link to="/dashboard" className="text-xl font-bold text-gray-800">
+              EduERP
+            </Link>
           </div>
 
           {/* Navigation Links */}
@@ -84,7 +66,7 @@ const Dashboard = ({ userRole = 'admin' }) => {
               {availableModules.map((module) => (
                 <Link
                   key={module.id}
-                  to={module.id === 'overview' ? '.' : module.id}
+                  to={module.id}
                   className={`flex items-center px-2 py-2 text-base rounded-md ${
                     location.pathname.includes(module.id)
                       ? 'bg-blue-100 text-blue-700'
@@ -121,28 +103,15 @@ const Dashboard = ({ userRole = 'admin' }) => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between px-6 py-4">
-            <h2 className="text-xl font-semibold text-gray-800">{getCurrentModuleName()}</h2>
-            <div className="flex items-center space-x-4">
-              {/* Add any header actions here */}
-            </div>
+            <h2 className="text-xl font-semibold text-gray-800">
+              {getCurrentModuleName()}
+            </h2>
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          <Routes>
-            {/* Default Overview Route */}
-            <Route index element={<Overview />} />
-            
-            {/* Dynamic Routes based on available modules */}
-            {availableModules.map((module) => (
-              <Route
-                key={module.id}
-                path={module.id}
-                element={<module.component />}
-              />
-            ))}
-          </Routes>
+        {/* Main Content - Render child routes */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+          <Outlet />
         </main>
       </div>
     </div>
