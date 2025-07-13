@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import './App.css';
 
 // Import components
@@ -20,13 +20,11 @@ function ProtectedRoute({ children }) {
   return isAuthenticated() ? children : <Navigate to="/login" />;
 }
 
-function AppContent() {
-  const { isAuthenticated } = useAuth();
-
+function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Routes>
-        <Route path="/" element={isAuthenticated() ? <Navigate to="/dashboard" /> : <Login />} />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/dashboard/*"
@@ -49,16 +47,6 @@ function AppContent() {
         </Route>
       </Routes>
     </div>
-  );
-}
-
-function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </BrowserRouter>
   );
 }
 
