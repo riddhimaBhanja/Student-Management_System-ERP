@@ -1,20 +1,23 @@
 const router = require('express').Router();
 const { authorizeRole } = require('../middleware/auth.middleware');
+const hostelController = require('../controllers/hostel.controller');
 
-router.get('/rooms', authorizeRole(['admin', 'staff']), async (req, res) => {
-  try {
-    res.json({ message: 'Hostel rooms endpoint' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// Hostel routes
+router.get('/', authorizeRole(['admin', 'staff']), hostelController.getAllHostels);
+router.get('/:id', authorizeRole(['admin', 'staff']), hostelController.getHostelById);
+router.post('/', authorizeRole(['admin']), hostelController.createHostel);
+router.put('/:id', authorizeRole(['admin']), hostelController.updateHostel);
+router.delete('/:id', authorizeRole(['admin']), hostelController.deleteHostel);
 
-router.get('/allocations', authorizeRole(['admin', 'staff']), async (req, res) => {
-  try {
-    res.json({ message: 'Room allocations endpoint' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// Room routes
+router.get('/rooms', authorizeRole(['admin', 'staff']), hostelController.getAllRooms);
+router.get('/:hostelId/rooms/:roomNumber', authorizeRole(['admin', 'staff']), hostelController.getRoomByNumber);
+router.post('/:hostelId/rooms', authorizeRole(['admin']), hostelController.addRoom);
+router.put('/:hostelId/rooms/:roomNumber', authorizeRole(['admin']), hostelController.updateRoom);
+router.delete('/:hostelId/rooms/:roomNumber', authorizeRole(['admin']), hostelController.deleteRoom);
+
+// Allocation routes
+router.get('/allocations', authorizeRole(['admin', 'staff']), hostelController.getRoomAllocations);
+router.post('/:hostelId/rooms/:roomNumber/allocate', authorizeRole(['admin']), hostelController.allocateRoom);
 
 module.exports = router;

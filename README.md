@@ -1,6 +1,6 @@
 # Student Management System (ERP)
 
-A comprehensive ERP system for educational institutions built with React and Tailwind CSS.
+A comprehensive ERP system for educational institutions built with React, Node.js, Express, MongoDB, and Tailwind CSS.
 
 ## Features
 
@@ -48,6 +48,66 @@ A comprehensive ERP system for educational institutions built with React and Tai
 - System logs
 - System settings
 - Report generation
+
+## Installation
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas)
+
+### Set up environment variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+VITE_API_URL=http://localhost:5000/api
+MONGODB_URI=mongodb://localhost:27017/student-management-system
+JWT_SECRET=your_jwt_secret_key_here
+PORT=5000
+```
+
+### Install dependencies and start the application
+
+```bash
+# Install backend dependencies
+cd backend
+npm install
+
+# Install frontend dependencies
+cd ..
+npm install
+
+# Seed the database with sample data
+cd backend
+npm run seed
+
+# Start the backend server
+npm run dev
+
+# In a new terminal, start the frontend
+cd ..
+npm run dev
+```
+
+## Seeding the Database
+
+The application comes with a seed script to populate the database with sample data. This includes:
+
+- Admin user (email: admin@example.com, password: password123)
+- Students
+- Faculty members
+- Courses
+- Books
+- Hostels
+- Departments
+
+To seed the database:
+
+```bash
+cd backend
+npm run seed
+```
 
 ## Technology Stack
 

@@ -12,6 +12,7 @@ const libraryRoutes = require('./routes/library.routes');
 const inventoryRoutes = require('./routes/inventory.routes');
 const hostelRoutes = require('./routes/hostel.routes');
 const adminRoutes = require('./routes/admin.routes');
+const departmentRoutes = require('./routes/department.routes');
 const { authenticateToken } = require('./middleware/auth.middleware');
 const globalErrorHandler = require('./utils/error-handler');
 const { AppError } = require('./utils/error-handler');
@@ -44,6 +45,7 @@ app.use('/api/library', authenticateToken, libraryRoutes);
 app.use('/api/inventory', authenticateToken, inventoryRoutes);
 app.use('/api/hostel', authenticateToken, hostelRoutes);
 app.use('/api/admin', authenticateToken, adminRoutes);
+app.use('/api/departments', authenticateToken, departmentRoutes);
 
 // Handle undefined routes
 app.all('*', (req, res, next) => {
