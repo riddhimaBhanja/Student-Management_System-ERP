@@ -3,19 +3,19 @@ const catchAsync = require('../utils/catchAsync');
 
 // Get all faculty members
 exports.getAllFaculty = catchAsync(async (req, res) => {
-  const faculty = await Faculty.find().populate('userId', '-password');
+  const faculty = await Faculty.find().populate('department', 'name');
   res.json(faculty);
 });
 
 // Get faculty member by ID
 exports.getFacultyById = catchAsync(async (req, res) => {
-  const faculty = await Faculty.findById(req.params.id).populate('userId', '-password');
+  const faculty = await Faculty.findById(req.params.id).populate('department', 'name');
   if (!faculty) {
     return res.status(404).json({ message: 'Faculty member not found' });
   }
   
-  // Check if user has permission to view this faculty member
-  if (req.user.role !== 'admin' && req.user._id.toString() !== faculty.userId.toString()) {
+  // Check if user has permission to view this faculty member (admin or self)
+  if (req.user.role !== 'admin' && req.user.email !== faculty.email) {
     return res.status(403).json({ message: 'Access denied' });
   }
   

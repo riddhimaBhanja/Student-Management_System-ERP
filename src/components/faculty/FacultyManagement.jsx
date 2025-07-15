@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { axiosInstance } from '../../utils/axios';
+import { toast } from 'react-toastify';
 
 const FacultyManagement = () => {
   const [activeTab, setActiveTab] = useState('employees');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [schedules, setSchedules] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [facultyList, setFacultyList] = useState([
     {
       id: 1,
@@ -73,7 +78,59 @@ const FacultyManagement = () => {
     setShowAddModal(false);
   };
 
-  const departments = [
+  // Fetch schedules when schedules tab is active
+  useEffect(() => {
+    if (activeTab === 'schedules') {
+      fetchSchedules();
+    } else if (activeTab === 'departments') {
+      fetchDepartments();
+    }
+  }, [activeTab]);
+
+  const fetchSchedules = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/academic/schedules');
+      setSchedules(response.data || []);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast.error('Failed to fetch schedules');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch departments from API
+  const fetchDepartments = async () => {
+    console.log('Fetching departments...');
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token available:', !!token);
+      const response = await axiosInstance.get('/departments');
+      console.log('Departments response:', response.data);
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      console.error('Error details:', error.response);
+      // If unauthorized, user needs to login first
+      if (error.response?.status === 401) {
+        console.log('User not authenticated. Please login to view departments.');
+        toast.error('Please login to view departments');
+      } else {
+        toast.error('Failed to fetch departments');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load departments on component mount
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const departmentOptions = [
     'Computer Science & Engineering',
     'Electronics & Communication',
     'Mechanical Engineering',
@@ -273,7 +330,7 @@ const FacultyManagement = () => {
                         required
                       >
                         <option value="">Select Department</option>
-                        {departments.map((dept) => (
+                        {departmentOptions.map((dept) => (
                           <option key={dept} value={dept}>{dept}</option>
                         ))}
                       </select>
@@ -333,16 +390,132 @@ const FacultyManagement = () => {
       {/* Departments Tab */}
       {activeTab === 'departments' && (
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Department Management Coming Soon</h3>
-          <p className="text-gray-600">This feature is under development.</p>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-black">Department Management</h3>
+            <button 
+              onClick={fetchDepartments}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Reload Departments
+            </button>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-3 text-black">Loading departments...</span>
+            </div>
+          ) : departments.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No departments found.</p>
+              <p className="text-sm text-gray-400">Please make sure you are logged in and try reloading.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full leading-normal">
+                <thead>
+                  <tr>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Department Code
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Department Name
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Faculty Count
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departments.map((dept) => (
+                    <tr key={dept._id}>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.code}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.name}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.description}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.faculty?.length || 0}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          dept.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {dept.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
       {/* Schedules Tab */}
       {activeTab === 'schedules' && (
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Faculty Schedules Coming Soon</h3>
-          <p className="text-gray-600">This feature is under development.</p>
+          <h3 className="text-lg font-semibold mb-4">Faculty Schedules</h3>
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {schedules.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                        No schedules found
+                      </td>
+                    </tr>
+                  ) : (
+                    schedules.map((schedule) => (
+                      <tr key={schedule._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {schedule.day}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.startTime} - {schedule.endTime}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.courseCode}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.room}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.batch}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

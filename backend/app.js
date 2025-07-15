@@ -32,8 +32,20 @@ if (!process.env.MONGODB_URI) {
 
 const app = express();
 
+// CORS configuration for Codespace environment
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://bug-free-orbit-wrgqvq7wg9r7fgvx-5173.app.github.dev',
+    'https://bug-free-orbit-wrgqvq7wg9r7fgvx-5174.app.github.dev'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Health check endpoint
