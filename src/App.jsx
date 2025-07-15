@@ -1,11 +1,13 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Import components
 import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import Dashboard from './components/dashboard/Dashboard';
 import Overview from './components/dashboard/Overview';
 import StudentManagement from './components/student/StudentRegistration';
@@ -17,10 +19,7 @@ import InventoryManagement from './components/inventory/InventoryManagement';
 import HostelManagement from './components/hostel/HostelManagement';
 import AdminManagement from './components/admin/AdminManagement';
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
-}
+
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -40,9 +39,10 @@ function App() {
         />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
             <ProtectedRoute>
               <Dashboard />

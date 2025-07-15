@@ -1,20 +1,10 @@
 const router = require('express').Router();
 const { authorizeRole } = require('../middleware/auth.middleware');
 
-router.get('/fees', authorizeRole(['admin', 'student']), async (req, res) => {
-  try {
-    res.json({ message: 'Fees endpoint' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+const financeController = require('../controllers/finance.controller');
 
-router.get('/transactions', authorizeRole(['admin']), async (req, res) => {
-  try {
-    res.json({ message: 'Transactions endpoint' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+router.get('/fees', authorizeRole(['admin', 'student']), financeController.getFees);
+
+router.get('/transactions', authorizeRole(['admin']), financeController.getTransactions);
 
 module.exports = router;

@@ -24,6 +24,11 @@ const hostelSchema = new mongoose.Schema({
     },
   },
 
+  // General Amenities
+  amenities: [{
+    type: String,
+  }],
+
   // Capacity and Rooms
   totalCapacity: {
     type: Number,
