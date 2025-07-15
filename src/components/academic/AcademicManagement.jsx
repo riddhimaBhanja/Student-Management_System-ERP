@@ -410,10 +410,10 @@ const AcademicManagement = () => {
                   ) : (
                     courses.map((course) => (
                       <tr key={course._id}>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{course.code}</td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{course.name}</td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{course.credits}</td>
-                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">{course.department}</td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">{course.courseCode}</td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">{course.name}</td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">{course.credits}</td>
+                        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">{course.department?.name || course.department}</td>
                         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                           <button 
                             className="text-red-600 hover:text-red-900 disabled:opacity-50"

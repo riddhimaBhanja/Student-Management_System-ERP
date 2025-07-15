@@ -6,6 +6,7 @@ const FacultyManagement = () => {
   const [activeTab, setActiveTab] = useState('employees');
   const [showAddModal, setShowAddModal] = useState(false);
   const [schedules, setSchedules] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [facultyList, setFacultyList] = useState([
     {
@@ -357,8 +358,72 @@ const FacultyManagement = () => {
       {/* Departments Tab */}
       {activeTab === 'departments' && (
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Department Management Coming Soon</h3>
-          <p className="text-gray-600">This feature is under development.</p>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-black">Department Management</h3>
+          </div>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <span className="ml-3 text-black">Loading departments...</span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full leading-normal">
+                <thead>
+                  <tr>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Department Code
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Department Name
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Description
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Faculty Count
+                    </th>
+                    <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {departments.map((dept) => (
+                    <tr key={dept._id}>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.code}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.name}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.description}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-black">
+                        {dept.faculty?.length || 0}
+                      </td>
+                      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          dept.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {dept.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                  {departments.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="px-5 py-5 text-center text-gray-500">
+                        <p className="text-black">No departments found.</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

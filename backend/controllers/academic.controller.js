@@ -10,7 +10,7 @@ exports.createCourse = catchAsync(async (req, res) => {
 });
 
 exports.getAllCourses = catchAsync(async (req, res) => {
-    const courses = await Course.find();
+    const courses = await Course.find().populate('department', 'name');
     res.json(courses);
 });
 

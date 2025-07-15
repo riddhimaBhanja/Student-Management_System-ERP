@@ -194,49 +194,56 @@ const LibraryManagement = () => {
             </div>
 
             {/* Books List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {books.map((book) => (
-                <div key={book._id} className="border rounded-lg p-4 shadow bg-white">
-                  <h3 className="text-lg font-semibold text-black">{book.title}</h3>
-                  <p className="text-gray-600">{book.authors.join(', ')}</p>
-                  <p className="text-sm text-gray-500">ISBN: {book.isbn}</p>
-                  <p className="text-sm text-gray-500">Category: {book.category}</p>
-                  <p className="text-sm text-gray-500">Publisher: {book.publisher}</p>
-                  <p className="text-sm text-gray-500">Edition: {book.edition}</p>
-                  <p className="mt-2 text-black font-medium">
-                    Available Copies: {book.copies.filter(c => c.status === 'Available').length}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Location: {book.location.shelf}, Row {book.location.row}, Section {book.location.section}
-                  </p>
-                  {(userRole === 'student' || userRole === 'faculty') && (
-                    <button
-                      onClick={() => handleIssueBook(book._id, book.copies[0]?.barcode)}
-                      disabled={!book.copies.some(c => c.status === 'Available')}
-                      className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300"
-                    >
-                      Issue Book
-                    </button>
-                  )}
-                </div>
-              ))}
-              {books.length === 0 && !isLoading && (
-                <div className="col-span-full text-center text-gray-500 py-8">
-                  <p className="text-black">No books found. Click "View All Books" to see the library collection.</p>
-                </div>
-              )}
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-black">Loading books...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {books.map((book) => (
+                  <div key={book._id} className="border rounded-lg p-4 shadow bg-white">
+                    <h3 className="text-lg font-semibold text-black">{book.title}</h3>
+                    <p className="text-gray-600">{book.authors.join(', ')}</p>
+                    <p className="text-sm text-gray-500">ISBN: {book.isbn}</p>
+                    <p className="text-sm text-gray-500">Category: {book.category}</p>
+                    <p className="text-sm text-gray-500">Publisher: {book.publisher}</p>
+                    <p className="text-sm text-gray-500">Edition: {book.edition}</p>
+                    <p className="mt-2 text-black font-medium">
+                      Available Copies: {book.copies.filter(c => c.status === 'Available').length}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Location: {book.location.shelf}, Row {book.location.row}, Section {book.location.section}
+                    </p>
+                    {(userRole === 'student' || userRole === 'faculty') && (
+                      <button
+                        onClick={() => handleIssueBook(book._id, book.copies[0]?.barcode)}
+                        disabled={!book.copies.some(c => c.status === 'Available')}
+                        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300"
+                      >
+                        Issue Book
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {books.length === 0 && !isLoading && (
+                  <div className="col-span-full text-center text-gray-500 py-8">
+                    <p className="text-black">No books found. Click "View All Books" to see the library collection.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {/* Borrowed Books Section */}
         {activeTab === 'borrowed' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">My Borrowed Books</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">My Borrowed Books</h2>
             <div className="grid grid-cols-1 gap-4">
               {myBooks.map((transaction) => (
-                <div key={transaction._id} className="border rounded-lg p-4 shadow">
-                  <h3 className="text-lg font-semibold">{transaction.book.title}</h3>
+                <div key={transaction._id} className="border rounded-lg p-4 shadow bg-white">
+                  <h3 className="text-lg font-semibold text-black">{transaction.book.title}</h3>
                   <p className="text-gray-600">Due Date: {new Date(transaction.dates.dueDate).toLocaleDateString()}</p>
                   <div className="mt-4 flex gap-4">
                     <button
@@ -254,6 +261,11 @@ const LibraryManagement = () => {
                   </div>
                 </div>
               ))}
+              {myBooks.length === 0 && (
+                <div className="text-center text-black py-8">
+                  <p>No borrowed books found.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -261,13 +273,13 @@ const LibraryManagement = () => {
         {/* Fines Section */}
         {activeTab === 'fines' && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">
+            <h2 className="text-xl font-semibold mb-4 text-black">
               My Fines (Total: ₹{myFines.totalFine})
             </h2>
             <div className="grid grid-cols-1 gap-4">
               {myFines.transactions.map((transaction) => (
-                <div key={transaction._id} className="border rounded-lg p-4 shadow">
-                  <h3 className="text-lg font-semibold">{transaction.book.title}</h3>
+                <div key={transaction._id} className="border rounded-lg p-4 shadow bg-white">
+                  <h3 className="text-lg font-semibold text-black">{transaction.book.title}</h3>
                   <p className="text-gray-600">Fine Amount: ₹{transaction.fine.amount}</p>
                   <button
                     onClick={() => handlePayFine(transaction.transactionId, transaction.fine.amount)}
@@ -277,6 +289,11 @@ const LibraryManagement = () => {
                   </button>
                 </div>
               ))}
+              {myFines.transactions.length === 0 && (
+                <div className="text-center text-black py-8">
+                  <p>No fines found.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
