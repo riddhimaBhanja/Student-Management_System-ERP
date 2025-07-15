@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://bug-free-orbit-wrgqvq7wg9r7fgvx-5000.app.github.dev/api',
+  baseURL: 'https://bug-free-orbit-wrgqvq7wg9r7fgvx-5000.app.github.dev/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,12 +11,18 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('Making request to:', config.baseURL + config.url);
+    console.log('Token available:', !!token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization header set');
+    } else {
+      console.log('No token found in localStorage');
     }
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );

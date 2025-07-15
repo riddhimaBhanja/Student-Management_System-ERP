@@ -78,27 +78,12 @@ const FacultyManagement = () => {
     setShowAddModal(false);
   };
 
-  const departments = [
-    'Computer Science & Engineering',
-    'Electronics & Communication',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Electrical Engineering',
-    'Information Technology'
-  ];
-
-  const designations = [
-    'Professor',
-    'Associate Professor',
-    'Assistant Professor',
-    'Senior Lecturer',
-    'Lecturer'
-  ];
-
   // Fetch schedules when schedules tab is active
   useEffect(() => {
     if (activeTab === 'schedules') {
       fetchSchedules();
+    } else if (activeTab === 'departments') {
+      fetchDepartments();
     }
   }, [activeTab]);
 
@@ -114,6 +99,53 @@ const FacultyManagement = () => {
       setLoading(false);
     }
   };
+
+  // Fetch departments from API
+  const fetchDepartments = async () => {
+    console.log('Fetching departments...');
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      console.log('Token available:', !!token);
+      const response = await axiosInstance.get('/departments');
+      console.log('Departments response:', response.data);
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Error fetching departments:', error);
+      console.error('Error details:', error.response);
+      // If unauthorized, user needs to login first
+      if (error.response?.status === 401) {
+        console.log('User not authenticated. Please login to view departments.');
+        toast.error('Please login to view departments');
+      } else {
+        toast.error('Failed to fetch departments');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load departments on component mount
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const departmentOptions = [
+    'Computer Science & Engineering',
+    'Electronics & Communication',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Electrical Engineering',
+    'Information Technology'
+  ];
+
+  const designations = [
+    'Professor',
+    'Associate Professor',
+    'Assistant Professor',
+    'Senior Lecturer',
+    'Lecturer'
+  ];
 
   return (
     <div className="p-6">
@@ -298,7 +330,7 @@ const FacultyManagement = () => {
                         required
                       >
                         <option value="">Select Department</option>
-                        {departments.map((dept) => (
+                        {departmentOptions.map((dept) => (
                           <option key={dept} value={dept}>{dept}</option>
                         ))}
                       </select>
@@ -360,12 +392,23 @@ const FacultyManagement = () => {
         <div className="bg-white shadow-md rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-black">Department Management</h3>
+            <button 
+              onClick={fetchDepartments}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Reload Departments
+            </button>
           </div>
           
           {loading ? (
             <div className="flex justify-center items-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               <span className="ml-3 text-black">Loading departments...</span>
+            </div>
+          ) : departments.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No departments found.</p>
+              <p className="text-sm text-gray-400">Please make sure you are logged in and try reloading.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -413,13 +456,6 @@ const FacultyManagement = () => {
                       </td>
                     </tr>
                   ))}
-                  {departments.length === 0 && (
-                    <tr>
-                      <td colSpan="5" className="px-5 py-5 text-center text-gray-500">
-                        <p className="text-black">No departments found.</p>
-                      </td>
-                    </tr>
-                  )}
                 </tbody>
               </table>
             </div>
