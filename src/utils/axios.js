@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://bug-free-orbit-wrgqvq7wg9r7fgvx-5000.app.github.dev/api',
   headers: {
     'Content-Type': 'application/json',
   },

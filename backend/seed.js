@@ -5,6 +5,7 @@ const User = require("./models/user.model");
 const Student = require("./models/student.model");
 const Faculty = require("./models/faculty.model");
 const Course = require("./models/course.model");
+const { Timetable, Exam, Assignment, Result } = require('./models/academic.model');
 const Book = require("./models/book.model");
 const Hostel = require("./models/hostel.model");
 const LibraryTransaction = require("./models/library-transaction.model");
@@ -58,6 +59,10 @@ const clearDatabase = async () => {
       await Student.deleteMany({});
       await Faculty.deleteMany({});
       await Course.deleteMany({});
+      await Timetable.deleteMany({});
+      await Exam.deleteMany({});
+      await Assignment.deleteMany({});
+      await Result.deleteMany({});
       await Book.deleteMany({});
       await Hostel.deleteMany({});
       await LibraryTransaction.deleteMany({});
@@ -1327,6 +1332,273 @@ const seedDepartments = async () => {
    }
 };
 
+// Seed Timetables/Schedules
+const seedTimetables = async (courses) => {
+   try {
+      const timetables = [
+         {
+            day: "Monday",
+            startTime: "09:00",
+            endTime: "10:30",
+            courseCode: "CS101",
+            room: "Room 101",
+            batch: "2024-CS-A"
+         },
+         {
+            day: "Monday",
+            startTime: "11:00",
+            endTime: "12:30",
+            courseCode: "MATH101",
+            room: "Room 201",
+            batch: "2024-CS-A"
+         },
+         {
+            day: "Tuesday",
+            startTime: "09:00",
+            endTime: "10:30",
+            courseCode: "ENG101",
+            room: "Room 301",
+            batch: "2024-CS-A"
+         },
+         {
+            day: "Tuesday",
+            startTime: "14:00",
+            endTime: "15:30",
+            courseCode: "CS201",
+            room: "Lab 1",
+            batch: "2024-CS-B"
+         },
+         {
+            day: "Wednesday",
+            startTime: "09:00",
+            endTime: "10:30",
+            courseCode: "PHYS101",
+            room: "Physics Lab",
+            batch: "2024-CS-A"
+         },
+         {
+            day: "Thursday",
+            startTime: "11:00",
+            endTime: "12:30",
+            courseCode: "CS101",
+            room: "Room 101",
+            batch: "2024-CS-B"
+         },
+         {
+            day: "Friday",
+            startTime: "09:00",
+            endTime: "10:30",
+            courseCode: "CS201",
+            room: "Lab 2",
+            batch: "2024-CS-A"
+         }
+      ];
+
+      const createdTimetables = await Timetable.create(timetables);
+      console.log(`${createdTimetables.length} timetable entries created`);
+      return createdTimetables;
+   } catch (error) {
+      console.error('Error seeding timetables:', error);
+      process.exit(1);
+   }
+};
+
+// Seed Examinations
+const seedExams = async (courses) => {
+   try {
+      const exams = [
+         {
+            examName: "Mid-term Examination",
+            courseCode: "CS101",
+            date: new Date("2024-03-15"),
+            startTime: "09:00",
+            endTime: "12:00",
+            venue: "Exam Hall A",
+            maxMarks: 100
+         },
+         {
+            examName: "Final Examination",
+            courseCode: "CS101",
+            date: new Date("2024-05-20"),
+            startTime: "09:00",
+            endTime: "12:00",
+            venue: "Exam Hall B",
+            maxMarks: 100
+         },
+         {
+            examName: "Mid-term Examination",
+            courseCode: "MATH101",
+            date: new Date("2024-03-18"),
+            startTime: "14:00",
+            endTime: "17:00",
+            venue: "Exam Hall C",
+            maxMarks: 100
+         },
+         {
+            examName: "Quiz 1",
+            courseCode: "ENG101",
+            date: new Date("2024-02-10"),
+            startTime: "10:00",
+            endTime: "11:00",
+            venue: "Room 301",
+            maxMarks: 25
+         },
+         {
+            examName: "Lab Practical",
+            courseCode: "PHYS101",
+            date: new Date("2024-04-05"),
+            startTime: "14:00",
+            endTime: "17:00",
+            venue: "Physics Lab",
+            maxMarks: 50
+         }
+      ];
+
+      const createdExams = await Exam.create(exams);
+      console.log(`${createdExams.length} examinations created`);
+      return createdExams;
+   } catch (error) {
+      console.error('Error seeding examinations:', error);
+      process.exit(1);
+   }
+};
+
+// Seed Assignments
+const seedAssignments = async (courses, faculty) => {
+   try {
+      // Ensure we have faculty members
+      if (!faculty || faculty.length === 0) {
+         console.log('No faculty members found, skipping assignments');
+         return [];
+      }
+
+      const assignments = [
+         {
+            title: "Programming Assignment 1",
+            description: "Write a program to implement basic sorting algorithms",
+            courseCode: "CS101",
+            assignedBy: faculty[0]._id,
+            dueDate: new Date("2024-02-28"),
+            maxMarks: 50,
+            status: "Active"
+         },
+         {
+            title: "Data Structures Project",
+            description: "Implement a binary search tree with all operations",
+            courseCode: "CS201",
+            assignedBy: faculty[0]._id,
+            dueDate: new Date("2024-03-30"),
+            maxMarks: 100,
+            status: "Active"
+         },
+         {
+            title: "Calculus Problem Set",
+            description: "Solve integration and differentiation problems",
+            courseCode: "MATH101",
+            assignedBy: faculty[1] ? faculty[1]._id : faculty[0]._id,
+            dueDate: new Date("2024-02-25"),
+            maxMarks: 75,
+            status: "Completed"
+         },
+         {
+            title: "Essay Writing",
+            description: "Write a 1000-word essay on modern literature",
+            courseCode: "ENG101",
+            assignedBy: faculty[2] ? faculty[2]._id : faculty[0]._id,
+            dueDate: new Date("2024-03-10"),
+            maxMarks: 60,
+            status: "Active"
+         },
+         {
+            title: "Physics Lab Report",
+            description: "Submit detailed lab report on mechanics experiment",
+            courseCode: "PHYS101",
+            assignedBy: faculty[faculty.length - 1]._id,
+            dueDate: new Date("2024-03-20"),
+            maxMarks: 40,
+            status: "Active"
+         }
+      ];
+
+      const createdAssignments = await Assignment.create(assignments);
+      console.log(`${createdAssignments.length} assignments created`);
+      return createdAssignments;
+   } catch (error) {
+      console.error('Error seeding assignments:', error);
+      process.exit(1);
+   }
+};
+
+// Seed Results
+const seedResults = async (students, courses) => {
+   try {
+      const results = [
+         {
+            studentId: students[0]._id,
+            courseCode: "CS101",
+            examType: "Midterm",
+            examName: "Mid-term Examination",
+            marksObtained: 85,
+            maxMarks: 100,
+            grade: "A",
+            semester: "Fall 2024",
+            academicYear: "2024-25"
+         },
+         {
+            studentId: students[0]._id,
+            courseCode: "MATH101",
+            examType: "Assignment",
+            examName: "Calculus Problem Set",
+            marksObtained: 70,
+            maxMarks: 75,
+            grade: "A",
+            semester: "Fall 2024",
+            academicYear: "2024-25"
+         },
+         {
+            studentId: students[1]._id,
+            courseCode: "CS101",
+            examType: "Quiz",
+            examName: "Programming Quiz 1",
+            marksObtained: 22,
+            maxMarks: 25,
+            grade: "A",
+            semester: "Fall 2024",
+            academicYear: "2024-25"
+         },
+         {
+            studentId: students[2]._id,
+            courseCode: "ENG101",
+            examType: "Assignment",
+            examName: "Essay Writing",
+            marksObtained: 55,
+            maxMarks: 60,
+            grade: "B+",
+            semester: "Fall 2024",
+            academicYear: "2024-25"
+         },
+         {
+            studentId: students[1]._id,
+            courseCode: "PHYS101",
+            examType: "Project",
+            examName: "Physics Lab Report",
+            marksObtained: 38,
+            maxMarks: 40,
+            grade: "A",
+            semester: "Fall 2024",
+            academicYear: "2024-25"
+         }
+      ];
+
+      const createdResults = await Result.create(results);
+      console.log(`${createdResults.length} results created`);
+      return createdResults;
+   } catch (error) {
+      console.error('Error seeding results:', error);
+      process.exit(1);
+   }
+};
+
 // Main seed function
 const seedDatabase = async () => {
    try {
@@ -1339,6 +1611,10 @@ const seedDatabase = async () => {
       const books = await seedBooks(departments);
       const hostels = await seedHostels();
       const transactions = await seedLibraryTransactions(students, books);
+      const timetables = await seedTimetables(courses);
+      const exams = await seedExams(courses);
+      const assignments = await seedAssignments(courses, faculty);
+      const results = await seedResults(students, courses);
 
       console.log("Database seeded successfully");
       process.exit(0);

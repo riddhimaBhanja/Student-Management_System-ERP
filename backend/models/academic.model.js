@@ -1,25 +1,5 @@
 const mongoose = require('mongoose');
 
-const courseSchema = new mongoose.Schema({
-    code: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    credits: {
-        type: Number,
-        required: true
-    },
-    department: {
-        type: String,
-        required: true
-    }
-});
-
 const timetableSchema = new mongoose.Schema({
     day: {
         type: String,
@@ -79,8 +59,91 @@ const examSchema = new mongoose.Schema({
     }
 });
 
-const Course = mongoose.model('Course', courseSchema);
+const assignmentSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    courseCode: {
+        type: String,
+        required: true
+    },
+    assignedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Faculty',
+        required: true
+    },
+    dueDate: {
+        type: Date,
+        required: true
+    },
+    maxMarks: {
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['Active', 'Completed', 'Overdue'],
+        default: 'Active'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
+const resultSchema = new mongoose.Schema({
+    studentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student',
+        required: true
+    },
+    courseCode: {
+        type: String,
+        required: true
+    },
+    examType: {
+        type: String,
+        enum: ['Assignment', 'Quiz', 'Midterm', 'Final', 'Project'],
+        required: true
+    },
+    examName: {
+        type: String,
+        required: true
+    },
+    marksObtained: {
+        type: Number,
+        required: true
+    },
+    maxMarks: {
+        type: Number,
+        required: true
+    },
+    grade: {
+        type: String,
+        enum: ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']
+    },
+    semester: {
+        type: String,
+        required: true
+    },
+    academicYear: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
 const Timetable = mongoose.model('Timetable', timetableSchema);
 const Exam = mongoose.model('Exam', examSchema);
+const Assignment = mongoose.model('Assignment', assignmentSchema);
+const Result = mongoose.model('Result', resultSchema);
 
-module.exports = { Course, Timetable, Exam };
+module.exports = { Timetable, Exam, Assignment, Result };

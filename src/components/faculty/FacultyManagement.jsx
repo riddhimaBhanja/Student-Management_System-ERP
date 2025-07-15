@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { axiosInstance } from '../../utils/axios';
+import { toast } from 'react-toastify';
 
 const FacultyManagement = () => {
   const [activeTab, setActiveTab] = useState('employees');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [facultyList, setFacultyList] = useState([
     {
       id: 1,
@@ -89,6 +93,26 @@ const FacultyManagement = () => {
     'Senior Lecturer',
     'Lecturer'
   ];
+
+  // Fetch schedules when schedules tab is active
+  useEffect(() => {
+    if (activeTab === 'schedules') {
+      fetchSchedules();
+    }
+  }, [activeTab]);
+
+  const fetchSchedules = async () => {
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get('/academic/schedules');
+      setSchedules(response.data || []);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast.error('Failed to fetch schedules');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -341,8 +365,56 @@ const FacultyManagement = () => {
       {/* Schedules Tab */}
       {activeTab === 'schedules' && (
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Faculty Schedules Coming Soon</h3>
-          <p className="text-gray-600">This feature is under development.</p>
+          <h3 className="text-lg font-semibold mb-4">Faculty Schedules</h3>
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Batch</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {schedules.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                        No schedules found
+                      </td>
+                    </tr>
+                  ) : (
+                    schedules.map((schedule) => (
+                      <tr key={schedule._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {schedule.day}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.startTime} - {schedule.endTime}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.courseCode}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.room}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {schedule.batch}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
